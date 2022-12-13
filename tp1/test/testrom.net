@@ -1,0 +1,5 @@
+INPUT a
+OUTPUT v 
+VAR a, v
+IN
+v = ROM 3 5 a

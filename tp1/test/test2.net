@@ -1,0 +1,5 @@
+INPUT ra, we, wa, c
+OUTPUT o
+VAR c : 4, o : 4, ra : 2, wa : 2, we
+IN
+o = RAM 2 4 ra we wa c

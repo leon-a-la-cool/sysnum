@@ -1,0 +1,9 @@
+INPUT r, b, c
+OUTPUT r, out_c
+VAR r, b, c, s, _c_5, _s_7, _c_9, out_c
+IN
+s = XOR r b
+_c_5 = AND r b
+_s_7 = XOR r c
+_c_9 = AND r c
+out_c = OR _c_5 _c_9

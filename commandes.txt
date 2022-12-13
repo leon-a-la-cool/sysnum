@@ -1,0 +1,7 @@
+riscv64-linux-gnu-objdump -D -b binary -m riscv ./a.bin
+
+riscv64-linux-gnu-objdump -D -b binary ./a.bin
+
+riscv64-linux-gnu-objcopy -O binary ./a.out ./a.bin
+
+riscv64-linux-gnu-objcopy -O binary ./a.out ./a.bin

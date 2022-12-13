@@ -1,0 +1,11 @@
+INPUT a
+OUTPUT x, y,z
+VAR
+  a, x, y,z
+IN
+x = REG y
+z= REG x
+y = a
+
+
+
