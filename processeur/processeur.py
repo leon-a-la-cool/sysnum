@@ -45,31 +45,33 @@ def processeur():
     raddr1 = rs1 
     raddr2 = rs2 
 
+
+
     wenable = op_entre_deux_reg | op_entre_reg_et_i
 
 
     rdata1,rdata2 = regblock(waddr,Defer(32,lambda:wdata),wenable,raddr1,raddr2)
 
-    allowin1 = op_entre_deux_reg
-    allowin2 = op_entre_deux_reg
-
+    allowin1 = op_entre_deux_reg | op_entre_reg_et_i
+   
 
     inalu1 = Mux(allowin1,zero,rdata1)
-    inalu2 = Mux(allowin2,zero,rdata2)
+    inalu2 = Mux(op_entre_reg_et_i,Mux(op_entre_deux_reg,zero,rdata2),Constant("0"*20)+immItype)
     
     vsub = sub & op_entre_deux_reg
     vnot = op_entre_deux_reg & Constant("0")
     vand = op_entre_deux_reg & Constant("0")
     vor = op_entre_deux_reg & Constant("0")
+    vxor = op_entre_deux_reg & Constant("0")
 
-    (wdata, overflow,negative,null) = alu(inalu1,inalu2,vsub,vnot,vand,vor,32)
+    (wdata,overflow,negative,null) = alu(inalu1,inalu2,vsub,vnot,vand,vor,vxor,32)
 
     return wdata
 
 def main():
     x = Input(1)
     a = processeur()
-    a.set_as_output
+    a.set_as_output("out")
     
 
 

@@ -1,2 +1,5 @@
-addi x1 , x0,   1
-addi x1 , x0,   1000
+addi x2 , x1, 5
+add x1, x2,x1
+
+addi x2 , x1, 5
+add x1, x2,x1

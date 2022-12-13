@@ -4,17 +4,18 @@ from processeur.nadder import adder
 
 allow_ribbon_logic_operations(True)
 
-def alu(a: Variable,b: Variable,vsub: Variable,vnot: Variable,vand: Variable,vor: Variable,n: int) ->  typing.Tuple[Variable, Variable]:
+def alu(a: Variable,b: Variable,vsub: Variable,vnot: Variable,vand: Variable,vor: Variable,vxor: Variable,n: int) ->  typing.Tuple[Variable, Variable]:
     b2 = a^b
     s,v = adder(a,b2,vsub)
     s2 = Mux(vnot,s,Not(a)) #not
     s3 = Mux(vand, s2, a & b)
     s4 = Mux (vor, s3, a | b )
-    neg = s4[n-1]
+    s5 = Mux(vxor, s4, Xor(a,b))
+    neg = s5[n-1]
     z = Constant("0")
     for i in range(n-1):
-        z = z | s4[i]
-    return (s4,v,neg,Not(z))
+        z = z | s5[i]
+    return (s5,v,neg,Not(z))
 
 
 
@@ -29,7 +30,8 @@ def main() -> None:
     vnot = Input(1)
     vand = Input(1)
     vor = Input(1)
-    (result, overflow,negative,null) = alu(a,b,vsub,vnot,vand,vor,n)
+    vxor=Input(1)
+    (result, overflow,negative,null) = alu(a,b,vsub,vnot,vand,vor,vxor,n)
     result.set_as_output("result")
     overflow.set_as_output("overflow")
     negative.set_as_output("negative")

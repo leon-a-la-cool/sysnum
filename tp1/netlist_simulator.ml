@@ -88,7 +88,7 @@ let simulator program number_steps =
 
     let rompath = read_line() in begin
       if rompath <> "" then
-        try (
+        (*try ( *)
           let ic = open_in rompath  in 
           for i = 0 to ((1 lsl addr_size) - 1) do
             let mot = Array.make word_size false in
@@ -98,8 +98,8 @@ let simulator program number_steps =
             done;
             rom.(i) <- VBitArray mot 
           done
-        ) 
-        with _ -> failwith "Invalid Input.\n"
+       (* ) *) 
+       (* with _ -> failwith "Invalid Input."*)
       else
         for i = 0 to ((1 lsl addr_size)-1) do
           rom.(i) <- VBitArray (Array.make word_size false)
