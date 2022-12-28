@@ -22,8 +22,8 @@ def regblock(waddr,wdata,wenable,raddr1,raddr2): #k puissance de 2 du nombre de 
     wdatalist = kdemux(waddr,wdata,k)
     wenablelist = kdemux(waddr,wenable,k)
 
-    lrdata = []
-    for i in range(n):
+    lrdata = [Constant("0"*32)]
+    for i in range(1,n):
         lrdata.append(reg(wdatalist[i],wenablelist[i]))
     rdata1 = kmux(raddr1,lrdata,k)
     rdata2 = kmux(raddr2,lrdata,k)

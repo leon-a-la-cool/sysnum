@@ -1,8 +1,8 @@
 
 
-
-riscv64-linux-gnu-as ./riscvprog/test.s
+riscv64-linux-gnu-as $1
 riscv64-linux-gnu-objcopy -O binary ./a.out ./a.bin
 riscv64-linux-gnu-objdump -D -b binary -m riscv ./a.bin
 xxd -b -c 4 ./a.bin > ./a.txt
-python3 ./format.py ./a.txt
+python3 ./format.py ./a.txt $2
+rm a.out a.bin a.txt

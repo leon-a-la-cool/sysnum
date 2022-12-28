@@ -237,6 +237,10 @@ let simulator program number_steps =
     env := Env.empty;
     compteur := if (!compteur) <> (-1) then !compteur - 1 else !compteur;
     
+    let lram = ref [||] in
+    let () = Hashtbl.iter (function _ -> fun x -> (lram := x)) memoiresRAM in 
+    let ram = !lram in
+    let t = Array.map int_of_bits [|ram.(0);ram.(1);ram.(2);ram.(3)|] in Array.iter (fun x->print_int x;print_newline ()) t;
 
 
   done

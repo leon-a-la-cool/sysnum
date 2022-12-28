@@ -2,9 +2,10 @@ import sys
 
 
 path = sys.argv[1]
+outpath = sys.argv[2]
 
 fichier = open(path,"r")
-output = open("output.txt","w")
+output = open(outpath,"w")
     
 
 l = fichier.readlines()
