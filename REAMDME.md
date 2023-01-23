@@ -1,6 +1,6 @@
 Pour compiler : ./compile
 
-Pour exécutrer l'horloge : ./horloge <vitesse> <date intiale>
+Pour exécuter l'horloge : ./horloge <vitesse> <date intiale>
     valeurs possibles : 
         <vitesse>: -slow : vitesse réelle
                    -fast : vitesse maximale
