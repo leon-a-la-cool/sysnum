@@ -8,12 +8,27 @@ main:
 
 
 display_flip:
-    sw x1, 1(x0)
-    sw x2, 2(x0)
-    sw x3, 3(x0)
-    sw x4, 4(x0)
-    sw x5, 5(x0)
-    sw x6, 6(x0)
+    addi x8,x1,0
+    ecall
+    sw x8, 1(x0)
+    addi x8,x2,0
+    ecall
+    sw x8, 2(x0)
+    addi x8,x3,0
+    ecall
+    sw x8, 3(x0)
+    addi x8,x4,0
+    ecall
+    sw x8, 4(x0)
+    addi x8,x5,0
+    ecall
+    sw x8, 5(x0)
+    addi x8,x6,0
+    ecall
+    sw x8, 6(x0)
+    addi x8,x7,0
+    ecall
+    sw x8, 7(x0)
     lw x13, 9(x0)
     xori x13,x13,1
     sw x13, 9(x0)
@@ -27,14 +42,25 @@ main2:
     jal x0,display_flip
 
 
-#x1,x2,x3,x4,x5,x6 = sec min hr jr mois an 
+#x1,x2,x3,x4,x5,x6,x7 = sec min hr jr mois andizaine anmillier 
 #x13 = travail
 #x14,x15 = clock
 #x11 = parité mois
 #x10 = bisextile
 bisextile_reset:
     sub x10,x10,x10
+    lui x13,100
+    beq x6,x13,decade_reset
     jal x0,main
+
+
+decade_reset:
+    lui x6,0
+    addi x7,x7,1
+    jal x0,display_flip
+
+
+
 
 mounth_reset:
     lui x5,1
@@ -93,10 +119,6 @@ hr_reset:
     lui x13, 7
     ble x5,x13,janjul
     jal x0,augdec
-
-
-
-
 
 
 min_reset:

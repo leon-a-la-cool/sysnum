@@ -20,15 +20,6 @@ python3 ./carotte.py ./processeur/ndemux.py > ./processeur/ndemux.net
 
 
 
-Pour tester des netlists :
-
-./tp1/netlist_simulator.byte *chemin vers la netlist*
-
-
-
-
-
-
 
 
 Pour assembler des fichiers de code en RISCV vers un fichier .txt contenant du binaire :
@@ -40,7 +31,9 @@ Utiliser le script assembler:
 
 
 
-Les programmes ont aux maximum 128 instr
+Processeur 16 registres de 16 bits
+
+Les programmes ont au maximum 128 instr
 la RAM a 256 addressses diff
 
 
@@ -66,7 +59,14 @@ Le comportement du mux est cohérent
 
 Les registres sont maitentant initialisé à la bonne taille
 
-Les adresses memoire de la ram 0,1,2,3 sont affichées, le simulateur crash sur une netlist sans ram mais c'est facile à changer
+Les adresses memoire de la ram 1,2,3,4,5,6 sont affichées, le simulateur crash sur une netlist sans ram
+
+Il faut donner via l'argument -r le programme à exécuter.
+
+Utiliser -fullspeed pour vitesse maximale
 
 
 
+
+
+Quand on ecall, x8 est converti en 7seg, envoyé dans x8 

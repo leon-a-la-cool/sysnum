@@ -1,10 +1,15 @@
 
 open Netlist_ast
-
-
+open Unix
+open Format
+open Printf
 
 let print_only = ref false
 let number_steps = ref (-1)
+let mode = ref 1
+let rompath = ref ""
+let fullspeed = ref false
+let flip = ref false
 
 (* fonctions de calcul*)
 
@@ -31,20 +36,6 @@ let rec ebinop binop arg1 arg2 =
     | VBit x1, VBitArray [|x2|]| VBitArray [|x1|], VBit x2 -> VBit (aux () x1 x2)
     | _ -> failwith "taille invalide1"
 
-(*let rec emux (choix,a,b) = 
-    match choix with
-      |VBit c |VBitArray [|c|] -> 
-        begin match a,b with
-          |VBit a0,VBitArray [|b0|]|VBitArray [|a0|],VBit b0|VBit a0,VBit b0 | VBitArray [|a0|], VBitArray [|b0|] -> if not c then VBit a0 else VBit b0 
-          |_ -> failwith "taille invalide2" end
-      |VBitArray tc ->
-        begin match a,b with
-          |VBitArray ta, VBitArray tb -> (let n = Array.length tc in let t = Array.make n false in 
-            for i = 0 to (n-1) do 
-              t.(i)<-if tc.(i) then tb.(i) else ta.(i)
-            done; VBitArray t)
-          |_ -> failwith "taille invalide3" end*)
-   
 let rec emux outputname (choix,a,b) = 
   match choix with
     |VBit c |VBitArray [|c|] -> 
@@ -62,9 +53,27 @@ let rec emux outputname (choix,a,b) =
 
 let int_of_bits x = match x with
     |VBit b -> if b then 1 else 0
-    |VBitArray t -> let n = ref ((Array.length t) - 1) in let valeur = ref 0 in Array.iter (fun b -> (if b then valeur := !valeur + 1 lsl !n; decr n)) t; !valeur  
+    |VBitArray t -> let n = ref ((Array.length t) - 1) in let valeur = ref 0 in Array.iter (fun b -> (if b then valeur := !valeur + 1 lsl (!n); decr n)) t; !valeur  
 
 
+let int_of_7seg t=
+  let aux = function
+  | [|true;true;true;true;true;true;false|] -> 0
+  | [|false;true;true;false;false;false;false|] -> 1
+  | [|true;true;false;true;true;false;true|] -> 2
+  | [|true;true;true;true;false;false;true|] -> 3
+  | [|false;true;true;false;false;true;true|] -> 4
+  | [|true;false;true;true;false;true;true|] -> 5
+  | [|true;false;true;true;true;true;true|] -> 6
+  | [|true;true;true;false;false;false;false|] -> 7
+  | [|true;true;true;false;false;true;true|] -> 9
+  | [|true;true;true;true;true;true;true|] -> 8
+  |_ -> failwith "erreur"
+in match t with |VBitArray m -> aux (Array.sub m 2 7) * 10 + aux (Array.sub m 9 7) | _ -> failwith "erreur"
+
+
+
+let spetseg_of_val v = match v with |VBitArray t -> let s= ref "" in (Array.iter (fun x -> if x then s:= !s ^"1" else s:= !s ^"0") (Array.sub t 2 14)); !s |_-> failwith "erreur"
 (****************)
 
 
@@ -73,23 +82,22 @@ let simulator program number_steps =
 
   (*Initialisation de la mémoire et de l'environement*)
   let memoiresROM = Hashtbl.create 0 in
-  let memoiresRAM = Hashtbl.create 0 in
+  let ram = Array.make (1 lsl 8) (VBit false) in
   let env = ref Env.empty in
   let envprecedent = ref Env.empty in
   let ecritureRAM = Stack.create () in
   
   let initialiser_mem eq = match eq with
-  | outname,Erom (addr_size,word_size,adr) -> print_string ("Choisissez un fichier pour initialiser la ROM associée à " ^ outname ^ " (laisser vide pour initialiser à 0 ):\n");
-
+  | outname,Erom (addr_size,word_size,adr) -> 
     let rom = Array.make (1 lsl addr_size) (VBitArray [||]) in 
     for i = 0 to ((1 lsl addr_size) - 1) do
       rom.(i)<-VBitArray (Array.make word_size false)
     done;
 
-    let rompath = read_line() in begin
-      if rompath <> "" then
+    begin
+      if !rompath <> "" then
         (*try ( *)
-          let ic = open_in rompath  in 
+          let ic = open_in !rompath  in 
           for i = 0 to ((1 lsl addr_size) - 1) do
             let mot = Array.make word_size false in
             let ligne = input_line ic in
@@ -109,7 +117,6 @@ let simulator program number_steps =
 
   | outname,Eram (addr_size,word_size,read_addr,write_enable,write_addr,data) -> print_string ("Choisissez un fichier pour initialiser la RAM associée à " ^ outname ^ " (laisser vide pour initialiser à 0 ):\n");
     
-    let ram = Array.make (1 lsl addr_size) (VBitArray [||]) in 
     for i = 0 to ((1 lsl addr_size) - 1) do
       ram.(i)<-VBitArray (Array.make word_size false)
     done;
@@ -131,8 +138,7 @@ let simulator program number_steps =
       else
         for i = 0 to ((1 lsl addr_size)-1) do
           ram.(i) <- VBitArray (Array.make word_size false)
-        done end;
-    Hashtbl.add memoiresRAM outname ram
+        done end
   | _ -> ()
   in
   List.iter initialiser_mem (program.p_eqs);
@@ -158,7 +164,7 @@ let simulator program number_steps =
           let n = int_of_bits (calcularg adr) in 
           rom.(n)
     | Eram (addrsize,wordsize,read_addr,write_enable,write_addr,data) -> begin
-          let ram = Hashtbl.find memoiresRAM outputname in 
+          
           let x = (let n = int_of_bits (calcularg read_addr) in ram.(n)) in
           if (calcularg write_enable) = VBit true then Stack.push (outputname,write_addr,data) ecritureRAM ;
           x end
@@ -176,7 +182,7 @@ let simulator program number_steps =
   in
 
 
-  let ecrireram () = while not (Stack.is_empty ecritureRAM) do let outname,write_addr,data = Stack.pop ecritureRAM in let n = int_of_bits (calcularg write_addr) in (Hashtbl.find memoiresRAM outname).(n) <- (calcularg data) done in
+  let ecrireram () = while not (Stack.is_empty ecritureRAM) do let outname,write_addr,data = Stack.pop ecritureRAM in let n = int_of_bits (calcularg write_addr) in ram.(n) <- (calcularg data) done in
 
   let traitereq eq = 
     let outputident,expression = eq in env := (Env.add outputident (calcul outputident expression ) (!env)) 
@@ -221,9 +227,12 @@ let simulator program number_steps =
 
 
   (*boucle d'éxécution*)
+  let ltime = ref (time ())  in 
+  (*let precisetime = ref (gettimeofday ()) in*)
+  let prevdispflip = ref 0 in
 
   while (!compteur = -1) || (!compteur > 0) do
-    print_string "Step ";print_int (!step);print_string ":\n";incr step;
+    
     List.iter traiter_input prog_ordre.p_inputs;
     List.iter (*(fun e -> (match (Env.find (fst e) prog_ordre.p_vars) with |TBitArray n ->print_string (fst e); print_int n;print_newline () |_-> print_string (fst e); print_int (-1);print_newline () ); traitereq e)*) traitereq (prog_ordre.p_eqs);
     ecrireram ();
@@ -237,24 +246,34 @@ let simulator program number_steps =
     env := Env.empty;
     compteur := if (!compteur) <> (-1) then !compteur - 1 else !compteur;
     
-    let lram = ref [||] in
-    let () = Hashtbl.iter (function _ -> fun x -> (lram := x)) memoiresRAM in 
-    let ram = !lram in
-    let t = Array.map int_of_bits [|ram.(0);ram.(1);ram.(2);ram.(3)|] in Array.iter (fun x->print_int x;print_newline ()) t;
+    
+    let ttime = time () in if ttime -. !ltime > 0. || !fullspeed then begin
+    ltime := ttime;
+    match ram.(0) with VBit _ -> failwith "impossible" | VBitArray t -> t.(((Array.length t) - 1)) <- not (t.(((Array.length t) - 1)));
+    end;
 
+    if ((int_of_bits ram.(9)) <> !prevdispflip) || !flip then begin
+      
+    prevdispflip := (int_of_bits ram.(9));
 
+    let oc = open_out "./time.txt" in
+    let t = Array.map spetseg_of_val [|ram.(7);ram.(6);ram.(5);ram.(4);ram.(3);ram.(2);ram.(1)|] in fprintf oc "%s\n%s\n%s\n%s\n%s\n%s\n%s" t.(3) t.(2) t.(1) t.(0) t.(4) t.(5) t.(6) ; (*print_newline ();*)
+    close_out oc;
+    end;
+    
+    incr step;
   done
 
 
 
 
-let compile filename =
+let compile filename  =
   try
     let p = Netlist.read_file filename in
     begin try
         let p = Scheduler.schedule p in
         print_int !number_steps;
-        simulator p !number_steps
+        simulator p !number_steps 
       with
         | Scheduler.Combinational_cycle ->
             Format.eprintf "The netlist has a combinatory cycle.@.";
@@ -264,7 +283,7 @@ let compile filename =
 
 let main () =
   Arg.parse
-    ["-n", Arg.Set_int number_steps, "Number of steps to simulate"]
+    ["-n", Arg.Set_int number_steps, "Nombre d'étape à simuler"; "-r", Arg.Set_string rompath, "Programme à exécuter"; "-fullspeed", Arg.Set fullspeed, "Temps réel ou vitesse maximale";"-flip", Arg.Set flip, "Programme qui ne flip pas l'affichage avec x9"]
     compile
     ""
 ;;

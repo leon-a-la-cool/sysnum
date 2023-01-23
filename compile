@@ -1,0 +1,9 @@
+
+cd ./carotte/
+python3 ./carotte.py processeur/processeur.py > ./processeur/netlists/processeur.net
+cd ..
+./assembler ./riscvprog/clock.s ./clock.txt
+cd ./tp1/
+ocamlbuild netlist_simulator.byte
+cd ..
+./tp1/netlist_simulator.byte -r $1 ./carotte/processeur/netlists/processeur.net 

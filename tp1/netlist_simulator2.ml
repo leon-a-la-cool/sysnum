@@ -2,14 +2,13 @@
 open Netlist_ast
 open Unix
 open Format
-open Printf
+
 
 let print_only = ref false
 let number_steps = ref (-1)
 let mode = ref 1
 let rompath = ref ""
 let fullspeed = ref false
-let flip = ref false
 
 (* fonctions de calcul*)
 
@@ -36,6 +35,20 @@ let rec ebinop binop arg1 arg2 =
     | VBit x1, VBitArray [|x2|]| VBitArray [|x1|], VBit x2 -> VBit (aux () x1 x2)
     | _ -> failwith "taille invalide1"
 
+(*let rec emux (choix,a,b) = 
+    match choix with
+      |VBit c |VBitArray [|c|] -> 
+        begin match a,b with
+          |VBit a0,VBitArray [|b0|]|VBitArray [|a0|],VBit b0|VBit a0,VBit b0 | VBitArray [|a0|], VBitArray [|b0|] -> if not c then VBit a0 else VBit b0 
+          |_ -> failwith "taille invalide2" end
+      |VBitArray tc ->
+        begin match a,b with
+          |VBitArray ta, VBitArray tb -> (let n = Array.length tc in let t = Array.make n false in 
+            for i = 0 to (n-1) do 
+              t.(i)<-if tc.(i) then tb.(i) else ta.(i)
+            done; VBitArray t)
+          |_ -> failwith "taille invalide3" end*)
+   
 let rec emux outputname (choix,a,b) = 
   match choix with
     |VBit c |VBitArray [|c|] -> 
@@ -56,24 +69,6 @@ let int_of_bits x = match x with
     |VBitArray t -> let n = ref ((Array.length t) - 1) in let valeur = ref 0 in Array.iter (fun b -> (if b then valeur := !valeur + 1 lsl (!n); decr n)) t; !valeur  
 
 
-let int_of_7seg t=
-  let aux = function
-  | [|true;true;true;true;true;true;false|] -> 0
-  | [|false;true;true;false;false;false;false|] -> 1
-  | [|true;true;false;true;true;false;true|] -> 2
-  | [|true;true;true;true;false;false;true|] -> 3
-  | [|false;true;true;false;false;true;true|] -> 4
-  | [|true;false;true;true;false;true;true|] -> 5
-  | [|true;false;true;true;true;true;true|] -> 6
-  | [|true;true;true;false;false;false;false|] -> 7
-  | [|true;true;true;false;false;true;true|] -> 9
-  | [|true;true;true;true;true;true;true|] -> 8
-  |_ -> failwith "erreur"
-in match t with |VBitArray m -> aux (Array.sub m 2 7) * 10 + aux (Array.sub m 9 7) | _ -> failwith "erreur"
-
-
-
-let spetseg_of_val v = match v with |VBitArray t -> let s= ref "" in (Array.iter (fun x -> if x then s:= !s ^"1" else s:= !s ^"0") (Array.sub t 2 14)); !s |_-> failwith "erreur"
 (****************)
 
 
@@ -232,9 +227,9 @@ let simulator program number_steps =
   let prevdispflip = ref 0 in
 
   while (!compteur = -1) || (!compteur > 0) do
-    
+    (*print_string "Step ";print_int (!step);print_string ":\n";incr step;*)
     List.iter traiter_input prog_ordre.p_inputs;
-    List.iter (*(fun e -> (match (Env.find (fst e) prog_ordre.p_vars) with |TBitArray n ->print_string (fst e); print_int n;print_newline () |_-> print_string (fst e); print_int (-1);print_newline () ); traitereq e)*) traitereq (prog_ordre.p_eqs);
+    List.iter (fun e -> (match (Env.find (fst e) prog_ordre.p_vars) with |TBitArray n ->(print_string (fst e); print_int n;print_newline ()) |_-> (print_string (fst e); print_int (-1);print_newline ()); traitereq e)) (prog_ordre.p_eqs);
     ecrireram ();
     List.iter (fun ident ->(  print_string (ident ^ "= ");match (Env.find ident (!env)) with 
       |VBit v -> (print_string (if v then "1\n" else "0\n")) 
@@ -246,20 +241,18 @@ let simulator program number_steps =
     env := Env.empty;
     compteur := if (!compteur) <> (-1) then !compteur - 1 else !compteur;
     
+    (*print_float (gettimeofday () -. !precisetime); precisetime := gettimeofday ();*)
     
     let ttime = time () in if ttime -. !ltime > 0. || !fullspeed then begin
     ltime := ttime;
-    match ram.(0) with VBit _ -> failwith "impossible" | VBitArray t -> t.(((Array.length t) - 1)) <- not (t.(((Array.length t) - 1)));
+    (*print_string "Step ";print_int (!step);print_string ":\n";*)
+    match ram.(0) with VBit _ -> failwith "impossible" | VBitArray t -> (*((Array.iter (fun x -> print_int (if x then 1 else 0)) t ); print_newline ();*)t.(((Array.length t) - 1)) <- not (t.(((Array.length t) - 1)));
+   (* ram.(0) <- (let VBitArray t = ram.(0) in  VBitArray (Array.map (fun (x:bool) -> not x ) t));*)
+    let t = Array.map int_of_bits [|ram.(6);ram.(5);ram.(4);ram.(3);ram.(2);ram.(1)|] in printf "%d/%d/%d %dh%dm%ds" t.(2) t.(1) t.(0) t.(3) t.(4) t.(5) ; print_newline ();
+    
     end;
 
-    if ((int_of_bits ram.(9)) <> !prevdispflip) || !flip then begin
-      
-    prevdispflip := (int_of_bits ram.(9));
-
-    let oc = open_out "./time.txt" in
-    let t = Array.map spetseg_of_val [|ram.(7);ram.(6);ram.(5);ram.(4);ram.(3);ram.(2);ram.(1)|] in fprintf oc "%s\n%s\n%s\n%s\n%s\n%s\n%s" t.(3) t.(2) t.(1) t.(0) t.(4) t.(5) t.(6) ; (*print_newline ();*)
-    close_out oc;
-    end;
+    
     
     incr step;
   done
@@ -283,7 +276,7 @@ let compile filename  =
 
 let main () =
   Arg.parse
-    ["-n", Arg.Set_int number_steps, "Nombre d'étape à simuler"; "-r", Arg.Set_string rompath, "Programme à exécuter"; "-fullspeed", Arg.Set fullspeed, "Temps réel ou vitesse maximale";"-flip", Arg.Set flip, "Programme qui ne flip pas l'affichage avec x9"]
+    ["-n", Arg.Set_int number_steps, "Nombre d'étape à simuler"; "-r", Arg.Set_string rompath, "Programme à exécuter"; "-fullspeed", Arg.Set fullspeed, "Temps réel ou vitesse maximale"]
     compile
     ""
 ;;
