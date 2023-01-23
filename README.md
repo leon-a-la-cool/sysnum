@@ -1,3 +1,5 @@
+Pour compiler : ./compile
+
 
 Pour exécuter l'horloge : ./horloge <vitesse> <date intiale>
     valeurs possibles : 
