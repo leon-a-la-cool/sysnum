@@ -249,7 +249,7 @@ let simulator program number_steps =
     let gmt = gmtime (time ()) in 
       ram.(1)<-bit_of_int gmt.tm_sec;
       ram.(2)<-bit_of_int gmt.tm_min;
-      ram.(3)<-bit_of_int (gmt.tm_hour + 1);
+      ram.(3)<-bit_of_int ((gmt.tm_hour + 1) mod 24);
       ram.(4)<-bit_of_int gmt.tm_mday;
       ram.(5)<-bit_of_int (gmt.tm_mon + 1);
       ram.(6)<-bit_of_int (gmt.tm_year mod 100);
