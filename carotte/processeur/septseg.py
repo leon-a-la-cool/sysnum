@@ -16,7 +16,7 @@ def add3(a):
 def septseg(a): #correspondant a un tour a droite en partant du haut puis celui du milieu 
 
     zero = Constant("0000000")
-    l=[Constant("1111110"),Constant("0110000"),Constant("1101101"),Constant("1111001"),Constant("0110011"),Constant("1011011"),Constant("1011111"),Constant("1110000"),Constant("1111111"),Constant("1110011"),zero,zero,zero,zero,zero,zero]
+    l=[Constant("1111110"),Constant("0110000"),Constant("1101101"),Constant("1111001"),Constant("0110011"),Constant("1011011"),Constant("1011111"),Constant("1110000"),Constant("1111111"),Constant("1111011"),zero,zero,zero,zero,zero,zero]
     seg=kmux(a,l,4)
     return(seg)
 

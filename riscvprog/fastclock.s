@@ -10,11 +10,6 @@ lw x11,11(x0)
 
 
 
-main:
-    lw x14,(x0)
-    bne x15,x14,main2
-    jal x0,main
-
 
 display_flip:
     addi x8,x1,0
@@ -43,9 +38,9 @@ display_flip:
     sw x13, 9(x0)
     jal x0,main
 
-main2:
-    xori x15,x15,1
-    lui x13, 59
+main:
+    
+    lui x13, 59 #59
     beq x1, x13, sec_reset
     addi x1, x1, 1
     jal x0,display_flip

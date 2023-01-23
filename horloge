@@ -1,0 +1,45 @@
+
+
+
+
+case $1 in
+    "-slow" ) 
+        case $2 in 
+        "-currentdate" )
+        python3 affichage.py &
+        ./simulateur/netlist_simulator.byte -r ./clock.txt -currentdate ./carotte/processeur/netlists/processeur.net
+        ;;
+         "" )
+        python3 affichage.py &
+        ./simulateur/netlist_simulator.byte -r ./clock.txt ./carotte/processeur/netlists/processeur.net
+        ;;
+        esac;;
+    "-fast" )
+        case $2 in 
+            "-currentdate" )
+                python3 affichage.py &
+                ./simulateur/netlist_simulator.byte -r ./fastclock.txt -fullspeed -currentdate ./carotte/processeur/netlists/processeur.net;;
+            "" )
+                python3 affichage.py &
+                ./simulateur/netlist_simulator.byte -r ./fastclock.txt -fullspeed ./carotte/processeur/netlists/processeur.net;;
+            esac;;
+
+        
+    "-day" )
+        case $2 in
+            "-currentdate" )
+                python3 affichage.py &
+                ./simulateur/netlist_simulator.byte -r ./dayclock.txt -fullspeed -currentdate ./carotte/processeur/netlists/processeur.net;;
+            "" )
+                python3 affichage.py &
+                ./simulateur/netlist_simulator.byte -r ./dayclock.txt -fullspeed ./carotte/processeur/netlists/processeur.net;;
+            esac;;
+    * )
+        echo "usage : ./horloge <vitesse> <date initiale>"
+        echo "spécifier une option parmi : "
+        echo "-slow      : horloge temps réel avec affichage"
+        echo "-fast      : horloge accélérée avec affichage"
+        echo "-day      : horloge accélérée sur les jours avec affichage";;
+
+esac
+echo

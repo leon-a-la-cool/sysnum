@@ -8,14 +8,6 @@ lw x7,7(x0)
 lw x10,10(x0)
 lw x11,11(x0)
 
-
-
-main:
-    lw x14,(x0)
-    bne x15,x14,main2
-    jal x0,main
-
-
 display_flip:
     addi x8,x1,0
     ecall
@@ -43,12 +35,6 @@ display_flip:
     sw x13, 9(x0)
     jal x0,main
 
-main2:
-    xori x15,x15,1
-    lui x13, 59
-    beq x1, x13, sec_reset
-    addi x1, x1, 1
-    jal x0,display_flip
 
 
 #x1,x2,x3,x4,x5,x6,x7 = sec min hr jr mois andizaine anmillier 
@@ -97,17 +83,16 @@ feb_normal:
     lui x13,29
     beq x13,x4,day_reset
     jal x0,display_flip
-feb:
-
+feb:    
     lui x13,0
     beq x10,x13,feb_bis
     jal x0,feb_normal
 shortmonth:
-    lui x13,31
+    lui x13,31 #31
     beq x4,x13,day_reset
     jal x0,display_flip
 longmonth:
-    lui x13,32
+    lui x13,32 #32
     beq x4,x13,day_reset
     jal x0,display_flip
 augdec:
@@ -120,8 +105,7 @@ janjul:
     jal x0,shortmonth
 
 
-hr_reset:
-    lui x3,0
+main:
     addi x4,x4,1
     lui x13, 2
     beq x13, x5, feb
@@ -129,20 +113,4 @@ hr_reset:
     ble x5,x13,janjul
     jal x0,augdec
 
-
-min_reset:
-    lui x2,0
-    addi x3,x3, 1
-    lui x13,24 #24
-    beq x3,x13, hr_reset
-    jal x0,display_flip
-
-
-sec_reset:
-    lui x1,0
-    addi x2,x2, 1 
-    lui x13, 60 #60
-    beq x2,x13, min_reset
-    jal x0,display_flip
-    
 
