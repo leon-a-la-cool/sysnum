@@ -8,48 +8,20 @@ root=tk.Tk()
 root.title("Horloge")
 
 c=tk.Canvas(root,width=360,height=140,background="lightgray")
-
-
 def color(n,k):
     if k%8==6 or k%8==7:
         dec=1
     else:
         dec=0 
+    L=[[15,35,35,40],[10,15,15,35],[10,40,15,60],[15,60,35,65],[35,40,40,60],[35,15,40,35],[15,10,35,15]]
     nb=n
-    if nb%10:
-        c.create_rectangle(15+(k%8)*40+((k+1)%2)*5-dec*10,35+(k//8)*60,35+(k%8)*40+((k+1)%2)*5-dec*10,40+(k//8)*60,fill="black")
-    else:
-        c.create_rectangle(15+(k%8)*40+((k+1)%2)*5-dec*10,35+(k//8)*60,35+(k%8)*40+((k+1)%2)*5-dec*10,40+(k//8)*60,fill="lightgray",outline="lightgray")
-    nb=nb//10
-    if nb%10:
-        c.create_rectangle(10+(k%8)*40+((k+1)%2)*5-dec*10,15+(k//8)*60,15+(k%8)*40+((k+1)%2)*5-dec*10,35+(k//8)*60,fill="black")
-    else:
-        c.create_rectangle(10+(k%8)*40+((k+1)%2)*5-dec*10,15+(k//8)*60,15+(k%8)*40+((k+1)%2)*5-dec*10,35+(k//8)*60,fill="lightgray",outline="lightgray")
-    nb=nb//10
-    if nb%10:
-       c.create_rectangle(10+(k%8)*40+((k+1)%2)*5-dec*10,40+(k//8)*60,15+(k%8)*40+((k+1)%2)*5-dec*10,60+(k//8)*60,fill="black")
-    else:
-       c.create_rectangle(10+(k%8)*40+((k+1)%2)*5-dec*10,40+(k//8)*60,15+(k%8)*40+((k+1)%2)*5-dec*10,60+(k//8)*60,fill="lightgray",outline="lightgray")
-    nb=nb//10
-    if nb%10:
-        c.create_rectangle(15+(k%8)*40+((k+1)%2)*5-dec*10,60+(k//8)*60,35+(k%8)*40+((k+1)%2)*5-dec*10,65+(k//8)*60,fill="black")
-    else:
-        c.create_rectangle(15+(k%8)*40+((k+1)%2)*5-dec*10,60+(k//8)*60,35+(k%8)*40+((k+1)%2)*5-dec*10,65+(k//8)*60,fill="lightgray",outline="lightgray")
-    nb=nb//10
-    if nb%10:
-        c.create_rectangle(35+(k%8)*40+((k+1)%2)*5-dec*10,40+(k//8)*60,40+(k%8)*40+((k+1)%2)*5-dec*10,60+(k//8)*60,fill="black")
-    else:
-        c.create_rectangle(35+(k%8)*40+((k+1)%2)*5-dec*10,40+(k//8)*60,40+(k%8)*40+((k+1)%2)*5-dec*10,60+(k//8)*60,fill="lightgray",outline="lightgray")
-    nb=nb//10
-    if nb%10:
-        c.create_rectangle(35+(k%8)*40+((k+1)%2)*5-dec*10,15+(k//8)*60,40+(k%8)*40+((k+1)%2)*5-dec*10,35+(k//8)*60,fill="black")
-    else:
-        c.create_rectangle(35+(k%8)*40+((k+1)%2)*5-dec*10,15+(k//8)*60,40+(k%8)*40+((k+1)%2)*5-dec*10,35+(k//8)*60,fill="lightgray",outline="lightgray")
-    nb=nb//10
-    if nb%10:
-        c.create_rectangle(15+(k%8)*40+((k+1)%2)*5-dec*10,10+(k//8)*60,35+(k%8)*40+((k+1)%2)*5-dec*10,15+(k//8)*60,fill="black")
-    else:
-        c.create_rectangle(15+(k%8)*40+((k+1)%2)*5-dec*10,10+(k//8)*60,35+(k%8)*40+((k+1)%2)*5-dec*10,15+(k//8)*60,fill="lightgray",outline="lightgray")
+    for i in range(7):
+        if nb%10:
+            col="black"
+        else:
+            col="lightgrey"
+        c.create_rectangle(L[i][0]+(k%8)*40+((k+1)%2)*5-dec*10,L[i][1]+(k//8)*60,L[i][2]+(k%8)*40+((k+1)%2)*5-dec*10,L[i][3]+(k//8)*60,fill=col,outline=col)
+        nb=nb//10
 
 c.create_oval(163,80,172,89,fill="black")
 c.create_oval(163,106,172,115,fill="black")
